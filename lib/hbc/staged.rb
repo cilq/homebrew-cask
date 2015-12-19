@@ -28,14 +28,22 @@ module Hbc::Staged
 
   def set_permissions(paths, permissions_str)
     full_paths = Array(paths).map { |p| Pathname(p).expand_path }
-    @command.run!('/bin/chmod', args: ['-R', '--', permissions_str] + full_paths,
-                                sudo: true)
+
+    full_paths.each do |path|
+      next unless path.exist?
+      @command.run!('/bin/chmod', args: ['-R', '--', permissions_str] + path,
+                                  sudo: true)
+    end
   end
 
   def set_ownership(paths, user: current_user, group: 'staff')
     full_paths = Array(paths).map { |p| Pathname(p).expand_path }
-    @command.run!('/usr/sbin/chown', args: ['-R', '--', "#{user}:#{group}"] + full_paths,
-                                     sudo: true)
+
+    full_paths.each do |path|
+      next unless path.exist?
+      @command.run!('/usr/sbin/chown', args: ['-R', '--', "#{user}:#{group}"] + path,
+                                       sudo: true)
+    end
   end
 
   def current_user
